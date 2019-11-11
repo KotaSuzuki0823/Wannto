@@ -4,7 +4,6 @@
 #                       #
 #########################
 
-import bluetooth
 import subprocess
 import sys
 import serial
@@ -62,6 +61,7 @@ class AutoNoteRaspberryPi:
         self.socket = None # the listening sockets
         self.client_socket = None
         self.listed_devs = []
+        self.connection = False
 
         self.PORT = 1
 
@@ -70,39 +70,25 @@ class AutoNoteRaspberryPi:
 
         self.BTconn = None#Bluetooth connection infomation
 
-
     '''
     def connectSmartphoneDeviceBluetooth
     This function is connect Android device using bluetooth socket.
     You have to pairing bluetooth devices before use.
-    
-    def connectSmartphoneDeviceBluetooth(self):
-        print("Try Connecting smartphone...")
-        try:
-            self.socket = bluetooth.BluetoothSocket(bluetooth.L2CAP)  # create socket
-            self.socket.bind(("", self.PORT))
-            self.socket.listen(1)
-        except bluetooth.BluetoothError as e:
-            print("\n%s" % str(e))
-            self.socket.close()
-            sys.exit("socket error")
-
-        self.client_socket, address = self.socket.accept()
-        print("Accepted connection from ",address)
     '''
-
     def connectSmartphoneDeviceBluetooth(self):
-        self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=1)  # import Bluetooth connection infomation
-
+        try:
+            self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=1)  # import Bluetooth connection infomation
+            self.connection = True
+        except:
+            print("Bluetooth connection error.")
 
     '''
     def sendImage(self, image)
     This function is send data.
     '''
-    def sendDataBit(self, iamge):
-
-
-        self.socket.send(data)
+    def sendDataBit(self, image):
+        #self.port.write(self.translateBit(image))
+        self.port.write(image)
 
     '''
     def translateBit(self, imgfilepass)
@@ -118,8 +104,10 @@ class AutoNoteRaspberryPi:
     '''
     def getPhotoFromRasbpPiCamera(self):
         print('Getting photo from camera module.....')
+        filename = "Blackboard"+".jpg"
         try:
-            subprocess.run(["raspistill", "-o", "Blackboard.jpg"])
+            subprocess.run(["raspistill","-t","1000", "-o", filename])
+            return filename
         except subprocess.CalledProcessError as e:
             print("\n%s" % str(e))
             print("camera module is enabled?")
@@ -132,6 +120,25 @@ class AutoNoteRaspberryPi:
     def seeYouImage(self, imgfilepass):
         pass
 
+    '''
+    def listen(self, connection)
+    
+    '''
+    def listen(self, connection):
+        print("Listening request...")
+        res = self.port.read(16)
+        request = self.checkOrderType(res)
+
+        if connection:
+            if request == b'11':
+                return self.getPhotoFromRasbpPiCamera()
+            elif request == b'01':
+                sys.exit(0)
+            else:
+                print('error')
+                return None
+        else:
+            print("No connection.")
 
     '''
     def checkOrderType(self, message)
@@ -141,12 +148,14 @@ class AutoNoteRaspberryPi:
     '''
     def checkOrderType(self, message):
         if (message == self.REQUEST_SEND_IMAGE):
-            return True, 0
+            print("receive request send image")
+            return b'11'
         elif (message == self.REQUEST_FINISH):
-            return False, 0
+            print("receive request finish app")
+            return b'01'
         else:
             print('Request error')
-            return False, 1
+            return b'00'
 
     def finish(self):
         print("finish...")
@@ -156,7 +165,9 @@ class AutoNoteRaspberryPi:
 
 def run():
     app = AutoNoteRaspberryPi()
-    app.getPhotoFromRasbpPiCamera()
+    app.connectSmartphoneDeviceBluetooth()
+    app.listen(app.connection)
+
 
 if __name__ == "__main__":
     if args not in '-p':
