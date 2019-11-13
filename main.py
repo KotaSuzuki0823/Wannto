@@ -2,6 +2,7 @@ import subprocess
 import sys
 import serial
 import welcome
+import os
 
 #command-line arguments
 args = sys.argv
@@ -45,28 +46,29 @@ class AutoNoteRaspberryPi:
         try:
             self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=1)  # import Bluetooth connection infomation
             self.connection = True
+            print("Success connecting Android device.")
         except:
             sys.exit("Bluetooth connection error.")
 
     '''
-    def sendImage(self, imgfilepass)
-    imgfilepass:target image filepass(name)
+    def sendImage(self, imgfilepath)
+    imgfilepath:target image filepath(name)
     This function is send image data.
     '''
-    def sendDataBit(self, imgfilepass):
+    def sendPhotoImage(self, imgfilepath):
         #self.port.write(self.translateBit(image))
-        img = open(imgfilepass, "rb")
+        img = open(imgfilepath, "rb")
         print("image file sending...")
         self.BTconn.write(img)
         print("Success!!")
         img.close()
-        self.seeYouImage(imgfilepass)
+        self.seeYouImage(imgfilepath)
 
     '''
-    def translateBit(self, imgfilepass)
+    def translateBit(self, imgfilepath)
     translate image to bit.
     '''
-    def translateBit(self, imgfilepass):
+    def translateBit(self, imgfilepath):
         pass
 
     '''
@@ -84,16 +86,16 @@ class AutoNoteRaspberryPi:
             sys.exit(1)
 
     '''
-    def seeYouImage(self, imgfilepass)
-    imgfilepass : String Target image file pass or file name.
-    seeYouImage is kill image from filepass.
+    def seeYouImage(self, imgfilepath)
+    imgfilepath : String Target image file path or file name.
+    seeYouImage is kill image from filepath.
     '''
-    def seeYouImage(self, imgfilepass):
-        subprocess.run(["rm","-f", imgfilepass])
+    def seeYouImage(self, imgfilepath):
+        os.remove(imgfilepath)
 
     '''
     def listen(self, connection)
-    
+    listen is waiting order message from Android device and recognition order message.
     '''
     def listen(self, connection):
         print("Listening request...")
@@ -101,13 +103,13 @@ class AutoNoteRaspberryPi:
         request = self.checkOrderType(res)
 
         if connection:
-            if request == b'11':
+            if request == b'11':#send order
                 return True
-            elif request == b'01':
+            elif request == b'01':#request finish
                 self.finish()
             else:
-                print('error')
-                return None
+                print('unknown order')
+                return False
         else:
             print("No connection.")
 
@@ -135,18 +137,21 @@ class AutoNoteRaspberryPi:
 def run():
     app = AutoNoteRaspberryPi()
     app.connectSmartphoneDeviceBluetooth()
-    requestsendimage = False
-    while not requestsendimage:
+    while app.connection:#loop at connection true
         requestsendimage = app.listen(app.connection)
-
+        if requestsendimage:
+            img = app.getPhotoFromRasbpPiCamera()#take photo
+            app.sendPhotoImage()
 
 def testRun():
     test = AutoNoteRaspberryPi()
     img = test.getPhotoFromRasbpPiCamera()
-    test.sendDataBit(img)
+    test.sendPhotoImage(img)
 
 if __name__ == "__main__":
-    if args in "-p":
+    if "-p" in args:
         CheakCameraModule()
-    run()
+    if "-t" in args:
+        testRun()
 
+    run()
