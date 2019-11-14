@@ -8,38 +8,17 @@ import os
 args = sys.argv
 welcome.ShowName()
 
-'''
-def cheakCameraModule()
-This function is check camera module.
-if you are getting error despite connected camera module, Please check settings enabled camera module.
-'''
-def CheakCameraModule():
-    cmd = 'vcgencmd get_camera'#shell command
-    try:
-        cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]).decode('utf-8')
-    except subprocess.CalledProcessError as e:
-        print("\n%s" % str(e))
-        sys.exit('commandline error')
-
-    comp = (cmdResult == "supported=1 detected=1")#compear result
-    if comp:
-        return
-    else:
-        print(cmdResult)
-        sys.exit('camera module is not found.\ncamera module is enabled?')
-
 class AutoNoteRaspberryPi:
     def __init__(self):
         self.connection = False
         self.BTconn = None  # Bluetooth connection infomation
-        self.PORT = 1
 
-        self.REQUEST_FINISH = 0
+        self.REQUEST_FINISH = 11
         self.REQUEST_SEND_IMAGE = 1
 
     '''
-    def connectSmartphoneDeviceBluetooth
-    This function is connect Android device using bluetooth socket.
+    def connectSmartphoneDeviceBluetooth(self)
+    This function is connect Android device using bluetooth serial.
     You have to pairing bluetooth devices before use.
     '''
     def connectSmartphoneDeviceBluetooth(self):
@@ -47,8 +26,8 @@ class AutoNoteRaspberryPi:
             self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=1)  # import Bluetooth connection infomation
             self.connection = True
             print("Success connecting Android device.")
-        except:
-            sys.exit("Bluetooth connection error.")
+        except serial.SerialException as e:
+            sys.exit("\n%s" % str(e))
 
     '''
     def sendImage(self, imgfilepath)
@@ -59,8 +38,13 @@ class AutoNoteRaspberryPi:
         #self.port.write(self.translateBit(image))
         img = open(imgfilepath, "rb")
         print("image file sending...")
-        self.BTconn.write(img)
-        print("Success!!")
+        try:
+            self.BTconn.write(img)
+        except Exception as e:
+            print("Oops! %s\n" % str(e))
+            return None
+
+        print("Success!!\n")
         img.close()
         self.seeYouImage(imgfilepath)
 
@@ -82,8 +66,7 @@ class AutoNoteRaspberryPi:
             subprocess.run(["raspistill","-t","1000", "-o", filename])
             return filename
         except subprocess.CalledProcessError as e:
-            print("\n%s" % str(e))
-            sys.exit(1)
+            sys.exit("\n raspistill Call Error:%s" % str(e))
 
     '''
     def seeYouImage(self, imgfilepath)
@@ -95,7 +78,7 @@ class AutoNoteRaspberryPi:
 
     '''
     def listen(self, connection)
-    listen is waiting order message from Android device and recognition order message.
+    listen() is waiting order message from Android device and recognition order message.
     '''
     def listen(self, connection):
         print("Listening request...")
@@ -108,10 +91,10 @@ class AutoNoteRaspberryPi:
             elif request == b'01':#request finish
                 self.finish()
             else:
-                print('unknown order')
+                print('unknown order\n')
                 return False
         else:
-            print("No connection.")
+            print("No connection.\n")
 
     '''
     def checkOrderType(self, message)
@@ -121,19 +104,43 @@ class AutoNoteRaspberryPi:
     '''
     def checkOrderType(self, message):
         if (message == self.REQUEST_SEND_IMAGE):
-            print("receive request send image")
+            print("receive request send image\n")
             return b'11'
         elif (message == self.REQUEST_FINISH):
-            print("receive request finish app")
+            print("receive request finish app\n")
             return b'01'
         else:
-            print('Request error')
+            print('Request error\n')
             return b'00'
 
     def finish(self):
-        print("finish...")
+        print("finish...\n")
+        self.connection = False
         sys.exit(0)
 
+'''
+def cheakCameraModule()
+This function is check camera module.
+if you are getting error despite connected camera module, Please check settings enabled camera module.
+'''
+def CheakCameraModule():
+    cmd = 'vcgencmd get_camera'#shell command
+    try:
+        cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]).decode('utf-8')
+    except subprocess.CalledProcessError as e:
+        print("\n%s" % str(e))
+        sys.exit("\n Oops!! %s" % str(e))
+
+    comp = (cmdResult == "supported=1 detected=1")#compear result
+    if comp:
+        return
+    else:
+        print(cmdResult)
+        sys.exit('camera module is not found. camera module is enabled?\n')
+
+'''
+    main
+'''
 def run():
     app = AutoNoteRaspberryPi()
     app.connectSmartphoneDeviceBluetooth()
@@ -153,5 +160,5 @@ if __name__ == "__main__":
         CheakCameraModule()
     if "-t" in args:
         testRun()
-
-    run()
+    else:
+        run()
