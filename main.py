@@ -128,7 +128,6 @@ def CheakCameraModule():
     try:
         cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]).decode('utf-8')
     except subprocess.CalledProcessError as e:
-        print("\n%s" % str(e))
         sys.exit("\n Oops!! %s" % str(e))
 
     comp = (cmdResult == "supported=1 detected=1")#compear result
@@ -156,10 +155,29 @@ def testRun():
     img = test.getPhotoFromRasbpPiCamera()
     test.sendPhotoImage(img)
 
+def bindRfcomm():
+    while True:
+        print('[RFCOMM BIND]enter target Bluetooth addoress>>')
+        address = input()
+        cmd = 'rfcomm bind 0 ' + address
+        try:
+            cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]).decode('utf-8')
+        except subprocess.CalledProcessError as e:
+            sys.exit("\n Oops!! %s" % str(e))
+
+        if os.path.isfile('/dev/rfcomm0'):
+            print("Success!!\n")
+            return 
+        else:
+            print(cmdResult)
+
+
 if __name__ == "__main__":
     if "-p" in args:
         CheakCameraModule()
     if "-t" in args:
         testRun()
+    if "-b" in args:
+        bindRfcomm()
     else:
         run()
