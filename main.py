@@ -130,12 +130,7 @@ def CheakCameraModule():
     except subprocess.CalledProcessError as e:
         sys.exit("\n Oops!! %s" % str(e))
 
-    comp = (cmdResult == "supported=1 detected=1")#compear result
-    if comp:
-        return
-    else:
-        print(cmdResult)
-        sys.exit('camera module is not found. camera module is enabled?\n')
+    print(cmdResult)
 
 '''
     main
@@ -157,9 +152,9 @@ def testRun():
 
 def bindRfcomm():
     while True:
-        print('[RFCOMM BIND]enter target Bluetooth addoress>>')
+        print('[RFCOMM BIND]enter target Bluetooth addoress')
         address = input()
-        cmd = 'rfcomm bind 0 ' + address
+        cmd = 'sudo rfcomm bind 0 ' + address
         try:
             cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]).decode('utf-8')
         except subprocess.CalledProcessError as e:
@@ -167,7 +162,7 @@ def bindRfcomm():
 
         if os.path.isfile('/dev/rfcomm0'):
             print("Success!!\n")
-            return 
+            return
         else:
             print(cmdResult)
 
@@ -175,9 +170,9 @@ def bindRfcomm():
 if __name__ == "__main__":
     if "-p" in args:
         CheakCameraModule()
-    if "-t" in args:
-        testRun()
     if "-b" in args:
         bindRfcomm()
+    if "-t" in args:
+        testRun()
     else:
         run()
