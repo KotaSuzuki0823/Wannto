@@ -26,7 +26,7 @@ class AutoNoteRaspberryPi:
             self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=1)  # import Bluetooth connection infomation
             self.connection = True
             print("Success connecting Android device.")
-        except serial.SerialException as e:
+        except Exception as e:
             sys.exit("\n%s" % str(e))
 
     '''
@@ -148,10 +148,11 @@ def run():
         requestsendimage = app.listen(app.connection)
         if requestsendimage:
             img = app.getPhotoFromRasbpPiCamera()#take photo
-            app.sendPhotoImage()
+            app.sendPhotoImage(img)
 
 def testRun():
     test = AutoNoteRaspberryPi()
+    test.connectSmartphoneDeviceBluetooth()
     img = test.getPhotoFromRasbpPiCamera()
     test.sendPhotoImage(img)
 
