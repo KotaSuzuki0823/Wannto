@@ -46,8 +46,6 @@ class AutoNoteRaspberryPi:
 
         print("Success!!\n")
         img.close()
-        self.seeYouImage(imgfilepath)
-
     '''
     def translateBit(self, imgfilepath)
     translate image to bit.
@@ -143,12 +141,13 @@ def run():
         if requestsendimage:
             img = app.getPhotoFromRasbpPiCamera()#take photo
             app.sendPhotoImage(img)
+            app.seeYouImage(img)
 
 def testRun():
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
-    img = test.getPhotoFromRasbpPiCamera()
-    test.sendPhotoImage(img)
+    testpath = "./test.jpg"
+    test.sendPhotoImage(testpath)
 
 def bindRfcomm():
     while True:
