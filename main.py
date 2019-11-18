@@ -36,8 +36,8 @@ class AutoNoteRaspberryPi:
     '''
     def sendPhotoImage(self, imgfilepath):
         #self.port.write(self.translateBit(image))
-        with open(imgfilepath, "rb") as fp
-        imgfiledata = fp.read()
+        with open(imgfilepath, "rb") as fp:
+            imgfiledata = fp.read()
 
         print("image file sending...")
         try:
@@ -47,7 +47,6 @@ class AutoNoteRaspberryPi:
             return None
 
         print("Success!!\n")
-        img.close()
     '''
     def translateBit(self, imgfilepath)
     translate image to bit.
