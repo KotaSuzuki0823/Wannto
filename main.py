@@ -36,10 +36,12 @@ class AutoNoteRaspberryPi:
     '''
     def sendPhotoImage(self, imgfilepath):
         #self.port.write(self.translateBit(image))
-        img = open(imgfilepath, "rb")
+        with open(imgfilepath, "rb") as fp
+        imgfiledata = fp.read()
+
         print("image file sending...")
         try:
-            self.BTconn.write(img)
+            self.BTconn.write(imgfiledata)
         except Exception as e:
             print("Oops! %s\n" % str(e))
             return None
