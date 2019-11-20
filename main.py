@@ -150,9 +150,8 @@ def testRun():
     print("Running testRun()")
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
-    while test.connection:
-        testpath = "./test.jpg"
-        test.sendPhotoImage(testpath)
+    testpath = "./test.jpg"
+    test.sendPhotoImage(testpath)
 
 #not use
 def bindRfcomm():
