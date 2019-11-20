@@ -147,6 +147,7 @@ def run():
             app.seeYouImage(img)
 
 def testRun():
+    print("Running testRun()")
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
     testpath = "./test.jpg"
@@ -187,4 +188,5 @@ if __name__ == "__main__":
         thread_testrun = threading.Thread(target=testRun())
         thread_testrun.start()
     else:
-        run()
+        thread_run = threading.Thread(target=run())
+        thread_run.start()
