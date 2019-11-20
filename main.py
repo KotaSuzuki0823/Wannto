@@ -3,6 +3,7 @@ import sys
 import serial
 import welcome
 import os
+import threading
 
 #command-line arguments
 args = sys.argv
@@ -130,6 +131,7 @@ def CheakCameraModule():
         sys.exit("\n Oops!! %s" % str(e))
 
     print(cmdResult)
+    sys.exit(0)
 
 '''
     main
@@ -166,13 +168,23 @@ def bindRfcomm():
         else:
             print(cmdResult)
 
+def listenRFCOMM():
+    print('[RFCOMM] Listen /dev/rfcomm0')
+    cmd = 'sudo rfcomm listen /dev/rfcomm0 1'
+    try:
+        cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]).decode('utf-8')
+    except subprocess.CalledProcessError as e:
+        sys.exit("\n Oops!! %s" % str(e))
 
 if __name__ == "__main__":
     if "-p" in args:
         CheakCameraModule()
-    if "-b" in args:
-        bindRfcomm()
+
+    thread_rfcomm = threading.Thread(target=listenRFCOMM())
+    thread_rfcomm.start()
+
     if "-t" in args:
-        testRun()
+        thread_testrun = threading.Thread(target=testRun())
+        thread_testrun.start()
     else:
         run()

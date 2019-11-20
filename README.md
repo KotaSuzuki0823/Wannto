@@ -6,8 +6,6 @@
 /dev/rfcomm0の情報を利用してBluetooth通信を行います．
 なので事前にペアリングしておく必要あり．
 
-`python3 main.py -b`
-で実行するとBluetoothデバイスとRFCOMMでバインドできます．
 
 ## 実行方法
 シンプルな実行方法
