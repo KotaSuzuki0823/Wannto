@@ -172,7 +172,7 @@ def listenRFCOMM():
     print('[RFCOMM] Listen /dev/rfcomm0')
     cmd = 'sudo rfcomm listen /dev/rfcomm0 1'
     try:
-        cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]).decode('utf-8')
+        subprocess.call(cmd.split())
     except subprocess.CalledProcessError as e:
         sys.exit("\n Oops!! %s" % str(e))
 
