@@ -150,9 +150,11 @@ def testRun():
     print("Running testRun()")
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
-    testpath = "./test.jpg"
-    test.sendPhotoImage(testpath)
+    while test.connection:
+        testpath = "./test.jpg"
+        test.sendPhotoImage(testpath)
 
+#not use
 def bindRfcomm():
     while True:
         print('[RFCOMM BIND]enter target Bluetooth addoress')
@@ -169,24 +171,11 @@ def bindRfcomm():
         else:
             print(cmdResult)
 
-def listenRFCOMM():
-    print('[RFCOMM] Listen /dev/rfcomm0')
-    cmd = 'sudo rfcomm listen /dev/rfcomm0 1'
-    try:
-        subprocess.call(cmd.split())
-    except subprocess.CalledProcessError as e:
-        sys.exit("\n Oops!! %s" % str(e))
 
 if __name__ == "__main__":
     if "-p" in args:
         CheakCameraModule()
-
-    thread_rfcomm = threading.Thread(target=listenRFCOMM())
-    thread_rfcomm.start()
-
     if "-t" in args:
-        thread_testrun = threading.Thread(target=testRun())
-        thread_testrun.start()
+        testRun()
     else:
-        thread_run = threading.Thread(target=run())
-        thread_run.start()
+        run()
