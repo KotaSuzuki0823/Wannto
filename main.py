@@ -14,8 +14,8 @@ class AutoNoteRaspberryPi:
         self.connection = False
         self.BTconn = None  # Bluetooth connection infomation
 
-        self.REQUEST_FINISH = 11
-        self.REQUEST_SEND_IMAGE = 1
+        self.REQUEST_FINISH = b'48'#0
+        self.REQUEST_SEND_IMAGE = b'49'#1
 
     '''
     def connectSmartphoneDeviceBluetooth(self)
@@ -82,19 +82,22 @@ class AutoNoteRaspberryPi:
     '''
     def listen(self, connection):
         print("Listening request...")
-        res = self.BTconn.read(16)
-        request = self.checkOrderType(res)
+        req = self.BTconn.read(1)
 
         if connection:
-            if request == b'11':#send order
+            if (req == self.REQUEST_SEND_IMAGE):
+                print("receive request send image\n")
                 return True
-            elif request == b'01':#request finish
+            elif (req == self.REQUEST_FINISH):
+                print("receive request finish app\n")
                 self.finish()
             else:
-                print('unknown order\n')
+                print('Request error\n')
                 return False
+
         else:
             print("No connection.\n")
+            return False
 
     '''
     def checkOrderType(self, message)
@@ -102,6 +105,7 @@ class AutoNoteRaspberryPi:
     return : bool,int
     checkOrderType is decide next action, send image or finish.
     '''
+    #Not use
     def checkOrderType(self, message):
         if (message == self.REQUEST_SEND_IMAGE):
             print("receive request send image\n")
@@ -112,6 +116,7 @@ class AutoNoteRaspberryPi:
         else:
             print('Request error\n')
             return b'00'
+
 
     def finish(self):
         print("finish...\n")
@@ -150,8 +155,14 @@ def testRun():
     print("Running testRun()")
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
-    testpath = "./test.jpg"
-    test.sendPhotoImage(testpath)
+
+    req = test.listen(test.connection)
+    if req:
+        testpath = "./test.jpg"
+        test.sendPhotoImage(testpath)
+        print("sent!!")
+    else:
+        test.finish()
 
 #not use
 def bindRfcomm():
