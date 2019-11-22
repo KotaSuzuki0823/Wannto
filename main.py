@@ -100,24 +100,9 @@ class AutoNoteRaspberryPi:
             return False
 
     '''
-    def checkOrderType(self, message)
-    message : String
-    return : bool,int
-    checkOrderType is decide next action, send image or finish.
+    def finish(self)
+    finish is kill this process.
     '''
-    #Not use
-    def checkOrderType(self, message):
-        if (message == self.REQUEST_SEND_IMAGE):
-            print("receive request send image\n")
-            return b'11'
-        elif (message == self.REQUEST_FINISH):
-            print("receive request finish app\n")
-            return b'01'
-        else:
-            print('Request error\n')
-            return b'00'
-
-
     def finish(self):
         print("finish...\n")
         self.connection = False
@@ -156,13 +141,14 @@ def testRun():
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
 
-    req = test.listen(test.connection)
-    if req:
-        testpath = "./test.jpg"
-        test.sendPhotoImage(testpath)
-        print("sent!!")
-    else:
-        test.finish()
+    while test.connection:
+        req = test.listen(test.connection)
+        if req:
+            testpath = "./test.jpg"
+            test.sendPhotoImage(testpath)
+            print("sent!!")
+        else:
+            pass
 
 #not use
 def bindRfcomm():
