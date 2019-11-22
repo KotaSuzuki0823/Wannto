@@ -1,13 +1,17 @@
 import subprocess
 import sys
 import serial
-import welcome
+import welcome as w
 import os
-import threading
 
 #command-line arguments
 args = sys.argv
-welcome.ShowName()
+w.ShowName()
+def printOK(text):
+    print("[" + w.Color.GREEN + "   OK   " + w.Color.END + "]" + text)
+
+def printFATAL(text):
+    print("[" + w.Color.RED + "  FATAL " + w.Color.END + "]" + text)
 
 class AutoNoteRaspberryPi:
     def __init__(self):
@@ -24,11 +28,12 @@ class AutoNoteRaspberryPi:
     '''
     def connectSmartphoneDeviceBluetooth(self):
         try:
-            self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=1)  # import Bluetooth connection infomation
+            self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600)  # import Bluetooth connection infomation
             self.connection = True
-            print("Success connecting Android device.")
+            printOK("Success connecting Android device.")
         except Exception as e:
-            sys.exit("\n%s" % str(e))
+            printFATAL(e)
+            sys.exit(1)
 
     '''
     def sendImage(self, imgfilepath)
@@ -40,14 +45,14 @@ class AutoNoteRaspberryPi:
         with open(imgfilepath, "rb") as fp:
             imgfiledata = fp.read()
 
-        print("image file sending...")
+        printOK("image file sending...")
         try:
             self.BTconn.write(imgfiledata)
         except Exception as e:
-            print("Oops! %s\n" % str(e))
+            printFATAL("Oops! %s\n" % str(e))
             return None
 
-        print("Success!!\n")
+        printOK("Sent success.\n")
     '''
     def translateBit(self, imgfilepath)
     translate image to bit.
@@ -60,13 +65,14 @@ class AutoNoteRaspberryPi:
     getPhotoFromRasbpPiCamera is order take photo and import photo from Raspberry Pi camera.
     '''
     def getPhotoFromRasbpPiCamera(self):
-        print('Getting photo from camera module.....')
         filename = "Blackboard"+".jpg"
         try:
             subprocess.run(["raspistill","-t","1000", "-o", filename])
+            printOK('Get photo from camera module.')
             return filename
         except subprocess.CalledProcessError as e:
-            sys.exit("\n raspistill Call Error:%s" % str(e))
+            printFATAL("\n raspistill Call Error:%s" % str(e))
+            sys.exit(1)
 
     '''
     def seeYouImage(self, imgfilepath)
@@ -74,29 +80,33 @@ class AutoNoteRaspberryPi:
     seeYouImage is kill image from filepath.
     '''
     def seeYouImage(self, imgfilepath):
-        os.remove(imgfilepath)
+        try:
+            os.remove(imgfilepath)
+            printOK('image file is deleted.')
+        except Exception as e:
+            printFATAL("delete error:%s" % str(e))
 
     '''
     def listen(self, connection)
     listen() is waiting order message from Android device and recognition order message.
     '''
     def listen(self, connection):
-        print("Listening request...")
-        req = self.BTconn.read(1)
+        req = self.BTconn.read(2)
+        printOK("Received request:{}".format(req))
 
         if connection:
             if (req == self.REQUEST_SEND_IMAGE):
-                print("receive request send image\n")
+                printOK("receive request send image\n")
                 return True
             elif (req == self.REQUEST_FINISH):
-                print("receive request finish app\n")
+                printOK("receive request finish app\n")
                 self.finish()
             else:
-                print('Request error\n')
+                printFATAL('Request error\n')
                 return False
 
         else:
-            print("No connection.\n")
+            printFATAL("No connection.\n")
             return False
 
     '''
@@ -104,7 +114,8 @@ class AutoNoteRaspberryPi:
     finish is kill this process.
     '''
     def finish(self):
-        print("finish...\n")
+        self.BTconn.close()
+        printOK("Bluetooth connection is closed.")
         self.connection = False
         sys.exit(0)
 
@@ -137,18 +148,20 @@ def run():
             app.seeYouImage(img)
 
 def testRun():
-    print("Running testRun()")
+    printOK("Running testRun()")
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
 
-    while test.connection:
+    while True:
+        test.connectSmartphoneDeviceBluetooth()
         req = test.listen(test.connection)
         if req:
             testpath = "./test.jpg"
             test.sendPhotoImage(testpath)
-            print("sent!!")
+            printOK("sent!!")
         else:
             pass
+        test.BTconn.close()
 
 #not use
 def bindRfcomm():
