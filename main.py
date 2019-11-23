@@ -94,12 +94,12 @@ class AutoNoteRaspberryPi:
     def listen(self, connection):
         global req
         try:
-            req = self.BTconn.read(2)
+            req = self.BTconn.readline()
             printOK("Received request:{}".format(req))
         except serial.SerialTimeoutException as te:
-            printFATAL("TIMEOUT:{}".format(te))
+            printFATAL("TIMEOUT:{}".format(str(te)))
         except serial.SerialException as e:
-            printFATAL(e)
+            printFATAL(str(e))
 
         if connection:
             if req == self.REQUEST_SEND_IMAGE:
