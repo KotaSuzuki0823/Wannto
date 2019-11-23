@@ -28,7 +28,7 @@ class AutoNoteRaspberryPi:
     '''
     def connectSmartphoneDeviceBluetooth(self):
         try:
-            self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600)  # import Bluetooth connection infomation
+            self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=300)  # import Bluetooth connection infomation
             self.connection = True
             printOK("Success connecting Android device.")
         except Exception as e:
@@ -48,11 +48,10 @@ class AutoNoteRaspberryPi:
         printOK("image file sending...")
         try:
             self.BTconn.write(imgfiledata)
+            printOK("Sent success.")
         except Exception as e:
             printFATAL("Oops! %s\n" % str(e))
-            return None
 
-        printOK("Sent success.\n")
     '''
     def translateBit(self, imgfilepath)
     translate image to bit.
@@ -64,6 +63,7 @@ class AutoNoteRaspberryPi:
     def getPhotoFromRasbpPiCamera(self)
     getPhotoFromRasbpPiCamera is order take photo and import photo from Raspberry Pi camera.
     '''
+    @property
     def getPhotoFromRasbpPiCamera(self):
         filename = "Blackboard"+".jpg"
         try:
@@ -79,7 +79,8 @@ class AutoNoteRaspberryPi:
     imgfilepath : String Target image file path or file name.
     seeYouImage is kill image from filepath.
     '''
-    def seeYouImage(self, imgfilepath):
+    @staticmethod
+    def seeYouImage(imgfilepath):
         try:
             os.remove(imgfilepath)
             printOK('image file is deleted.')
@@ -91,14 +92,20 @@ class AutoNoteRaspberryPi:
     listen() is waiting order message from Android device and recognition order message.
     '''
     def listen(self, connection):
-        req = self.BTconn.read(2)
-        printOK("Received request:{}".format(req))
+        global req
+        try:
+            req = self.BTconn.read(2)
+            printOK("Received request:{}".format(req))
+        except serial.SerialTimeoutException as te:
+            printFATAL("TIMEOUT:{}".format(te))
+        except serial.SerialException as e:
+            printFATAL(e)
 
         if connection:
-            if (req == self.REQUEST_SEND_IMAGE):
+            if req == self.REQUEST_SEND_IMAGE:
                 printOK("receive request send image\n")
                 return True
-            elif (req == self.REQUEST_FINISH):
+            elif req == self.REQUEST_FINISH:
                 printOK("receive request finish app\n")
                 self.finish()
             else:
@@ -129,7 +136,7 @@ def CheakCameraModule():
     try:
         cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]).decode('utf-8')
     except subprocess.CalledProcessError as e:
-        sys.exit("\n Oops!! %s" % str(e))
+        sys.exit("Oops!! %s" % str(e))
 
     print(cmdResult)
     sys.exit(0)
@@ -143,7 +150,7 @@ def run():
     while app.connection:#loop at connection true
         requestsendimage = app.listen(app.connection)
         if requestsendimage:
-            img = app.getPhotoFromRasbpPiCamera()#take photo
+            img = app.getPhotoFromRasbpPiCamera  #take photo
             app.sendPhotoImage(img)
             app.seeYouImage(img)
 
@@ -152,8 +159,7 @@ def testRun():
     test = AutoNoteRaspberryPi()
     test.connectSmartphoneDeviceBluetooth()
 
-    while True:
-        test.connectSmartphoneDeviceBluetooth()
+    while test.connection:
         req = test.listen(test.connection)
         if req:
             testpath = "./test.jpg"
@@ -161,7 +167,8 @@ def testRun():
             printOK("sent!!")
         else:
             pass
-        test.BTconn.close()
+
+    test.BTconn.close()
 
 #not use
 def bindRfcomm():
