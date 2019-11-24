@@ -3,6 +3,7 @@ import sys
 import serial
 import welcome as w
 import os
+import time
 
 #command-line arguments
 args = sys.argv
@@ -20,6 +21,7 @@ class AutoNoteRaspberryPi:
 
         self.REQUEST_FINISH = b'48'#0
         self.REQUEST_SEND_IMAGE = b'49'#1
+        self.KEEP_ALIVE = b'50'#2
 
     '''
     def connectSmartphoneDeviceBluetooth(self)
@@ -93,21 +95,25 @@ class AutoNoteRaspberryPi:
     '''
     def listen(self, connection):
         global req
-        try:
-            req = self.BTconn.readline()
-            printOK("Received request:{}".format(req))
-        except serial.SerialTimeoutException as te:
-            printFATAL("TIMEOUT:{}".format(str(te)))
-        except serial.SerialException as e:
-            printFATAL(str(e))
-
         if connection:
+            try:
+                req = self.BTconn.read(2)
+                printOK("Received request:{}".format(req))
+            except serial.SerialTimeoutException as te:
+                printFATAL("TIMEOUT:{}".format(str(te)))
+                return None
+            except serial.SerialException as e:
+                printFATAL(str(e))
+                return None
+
             if req == self.REQUEST_SEND_IMAGE:
                 printOK("receive request send image\n")
                 return True
             elif req == self.REQUEST_FINISH:
                 printOK("receive request finish app\n")
                 self.finish()
+            elif req == self.KEEP_ALIVE:
+                pass
             else:
                 printFATAL('Request error\n')
                 return False
@@ -160,11 +166,13 @@ def testRun():
     test.connectSmartphoneDeviceBluetooth()
 
     while test.connection:
+        printOK("Listen...")
         req = test.listen(test.connection)
         if req:
             testpath = "./test.jpg"
             test.sendPhotoImage(testpath)
             printOK("sent!!")
+            time.sleep(1)
         else:
             pass
 
@@ -189,9 +197,12 @@ def bindRfcomm():
 
 
 if __name__ == "__main__":
-    if "-p" in args:
+    if args[1] == None:
+        run()
+    elif "-p" in args:
         CheakCameraModule()
-    if "-t" in args:
+    elif "-t" in args:
         testRun()
     else:
-        run()
+        printFATAL("%s is not option." % str(args[1]))
+        sys.exit(1)
