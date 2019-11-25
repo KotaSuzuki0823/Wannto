@@ -103,6 +103,7 @@ class AutoNoteRaspberryPi:
     def listen(self, connection):
         req = b'50'
         if connection:
+            printOK("Listen...")
             try:
                 req = self.BTconn.read(2)
                 printOK("Received request:{}".format(req))
@@ -173,7 +174,7 @@ def testRun():
     test.connectSmartphoneDeviceBluetooth()
 
     while test.connection:
-        printOK("Listen...")
+
         req = test.listen(test.connection)
         if req:
             testpath = "./test.jpg"
