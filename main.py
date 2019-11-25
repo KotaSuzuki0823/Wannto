@@ -94,7 +94,7 @@ class AutoNoteRaspberryPi:
     listen() is waiting order message from Android device and recognition order message.
     '''
     def listen(self, connection):
-        global req
+        req = b'50'
         if connection:
             try:
                 req = self.BTconn.read(2)
@@ -103,7 +103,7 @@ class AutoNoteRaspberryPi:
                 printFATAL("TIMEOUT:{}".format(str(te)))
                 return None
             except serial.SerialException as e:
-                printFATAL(str(e))
+                printFATAL("SerialException:{}".format(str(e)))
                 return None
 
             if req == self.REQUEST_SEND_IMAGE:
@@ -172,9 +172,10 @@ def testRun():
             testpath = "./test.jpg"
             test.sendPhotoImage(testpath)
             printOK("sent!!")
-            time.sleep(1)
+
         else:
             pass
+        time.sleep(1)
 
     test.BTconn.close()
 
@@ -197,12 +198,12 @@ def bindRfcomm():
 
 
 if __name__ == "__main__":
-    if args[1] == None:
+    if len(args) == 1:
         run()
     elif "-p" in args:
         CheakCameraModule()
     elif "-t" in args:
         testRun()
     else:
-        printFATAL("%s is not option." % str(args[1]))
+        printFATAL("command line argument error.")
         sys.exit(1)
