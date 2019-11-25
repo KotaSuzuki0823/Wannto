@@ -41,7 +41,7 @@ class AutoNoteRaspberryPi:
             self.connection = True
             printOK("Success connecting Android device.")
         except Exception as e:
-            printFATAL(e)
+            printFATAL(str(e))
             sys.exit(1)
 
     '''
