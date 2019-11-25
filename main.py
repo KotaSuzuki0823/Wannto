@@ -20,7 +20,7 @@ class AutoNoteRaspberryPi:
         self.BTconn = None  # Bluetooth connection infomation
 
         self.REQUEST_FINISH = b'48'#0
-        self.REQUEST_SEND_IMAGE = b'49'#1
+        self.REQUEST_SEND_IMAGE = b'cc'#1
         self.KEEP_ALIVE = b'50'#2
 
     '''
