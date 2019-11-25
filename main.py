@@ -29,8 +29,15 @@ class AutoNoteRaspberryPi:
     You have to pairing bluetooth devices before use.
     '''
     def connectSmartphoneDeviceBluetooth(self):
+        filepath = "/dev/rfcomm0"
+
+        while True:
+            if os.path.exists(filepath):
+                printOK("file ok.")
+                break
+
         try:
-            self.BTconn = serial.Serial("/dev/rfcomm0", baudrate=9600, timeout=300)  # import Bluetooth connection infomation
+            self.BTconn = serial.Serial(filepath, baudrate=9600, timeout=300)  # import Bluetooth connection infomation
             self.connection = True
             printOK("Success connecting Android device.")
         except Exception as e:
