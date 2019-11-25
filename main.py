@@ -20,7 +20,7 @@ class AutoNoteRaspberryPi:
         self.BTconn = None  # Bluetooth connection infomation
 
         self.REQUEST_FINISH = b'48'#0
-        self.REQUEST_SEND_IMAGE = b'c'#1
+        self.REQUEST_SEND_IMAGE = b'cc'#1
         self.KEEP_ALIVE = b'50'#2
 
     '''
@@ -31,6 +31,7 @@ class AutoNoteRaspberryPi:
     def connectSmartphoneDeviceBluetooth(self):
         filepath = "/dev/rfcomm0"
 
+        printOK("file checking....")
         while True:
             if os.path.exists(filepath):
                 printOK("file ok.")
@@ -106,7 +107,7 @@ class AutoNoteRaspberryPi:
             printOK("Listen...")
             try:
                 req = self.BTconn.read(2)
-                printOK("Received request:{}".format(req))
+                printOK("Received request:{},(str:{})".format(req,str(req)))
             except serial.SerialTimeoutException as te:
                 printFATAL("TIMEOUT:{}".format(str(te)))
                 return None
@@ -159,6 +160,7 @@ def CheakCameraModule():
     main
 '''
 def run():
+    printOK("Running...")
     app = AutoNoteRaspberryPi()
     app.connectSmartphoneDeviceBluetooth()
     while app.connection:#loop at connection true
