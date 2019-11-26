@@ -36,9 +36,9 @@ Python2.Xでは動きません．
 テスト時にmacとラズパイで通信するときに．
 2回目以降は接続からでOKです．
 ###  準備
-macOSのシステム環境設定のBluetoothの項目からraspberrypiを接続します．
-この段階では，接続してもすぐに未接続になるorエラーが出ます．
-
+~~macOSのシステム環境設定のBluetoothの項目からraspberrypiを接続します．
+この段階では，接続してもすぐに未接続になるorエラーが出ます．~~
+ここでペアリングすると詰みます．（tty.raspberrypi-SerialPortがでない）
 ### シリアルポート登録
 シリアルポート登録にはsdptoolというものを使います．
 ラズパイ側で以下のコマンドを実行してみます．
@@ -68,7 +68,17 @@ bluetoothdの再起動します．<br>
 `sudo sdptool add SP`<br>
 で行います．「Serial Port service registered」が出たら勝ちです．
 
+チャンネル指定するなら，<br>
+`sdptool add --channel=22 SP`<br>
+
 [参考文献][http://blog.robotakao.jp/blog-entry-135.html]
+### ペアリング
+シリアルポートを登録後，macとペアリングします．
+ラズパイ側から機器検索をおこない，macとペアリングします．<br>
+mac側でポートの確認を行います．<br>
+`ls -l /dev/tty.*`<br>
+/dev/tty.raspberrypi-SerialPortがあるか確認します．（これがラズパイのポート情報）
+
 
 ### RFCOMMセットアップ
 ラズパイ側でrfcommをlistenにします．
@@ -78,9 +88,6 @@ bluetoothdの再起動します．<br>
 「Waiting for connection on channel 1」と表示されます．
 
 ### 接続
-まずはmac側でポートの確認<br>
-`ls -l /dev/tty.*`<br>
-/dev/tty.raspberrypi-SerialPortがあるか確認します．（これがラズパイのポート情報）
 
 macで以下のコマンドを実行して接続します．<br>
 `sudo screen /dev/tty.raspberrypi-SerialPort`
