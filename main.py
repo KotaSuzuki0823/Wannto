@@ -61,7 +61,7 @@ class AutoNoteRaspberryPi:
             self.BTconn.flush()
             printOK("Sent success.")
         except Exception as e:
-            printFATAL("Oops! %s\n" % str(e))
+            printFATAL("Oops! %s" % str(e))
 
     '''
     def translateBit(self, imgfilepath)
@@ -82,7 +82,7 @@ class AutoNoteRaspberryPi:
             printOK('Get photo from camera module.')
             return filename
         except subprocess.CalledProcessError as e:
-            printFATAL("\n raspistill Call Error:%s" % str(e))
+            printFATAL(" raspistill Call Error:%s" % str(e))
             sys.exit(1)
 
     '''
@@ -117,19 +117,19 @@ class AutoNoteRaspberryPi:
                 sys.exit(1)
 
             if req == self.REQUEST_SEND_IMAGE:
-                printOK("receive request send image\n")
+                printOK("receive request send image")
                 return True
             elif req == self.REQUEST_FINISH:
-                printOK("receive request finish app\n")
+                printOK("receive request finish app")
                 self.finish()
             elif req == self.KEEP_ALIVE:
                 pass
             else:
-                printFATAL('Request error\n')
+                printFATAL('Request error')
                 return False
 
         else:
-            printFATAL("No connection.\n")
+            printFATAL("No connection.")
             return False
 
     '''
