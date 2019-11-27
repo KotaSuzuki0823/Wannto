@@ -57,7 +57,8 @@ class AutoNoteRaspberryPi:
 
         printOK("image file sending...")
         try:
-            self.BTconn.flush(imgfiledata)
+            self.BTconn.write(imgfiledata)
+            self.BTconn.flush()
             printOK("Sent success.")
         except Exception as e:
             printFATAL("Oops! %s\n" % str(e))
