@@ -4,6 +4,7 @@ import serial
 import welcome as w
 import os
 import time
+from PIL import Image
 
 #command-line arguments
 args = sys.argv
@@ -131,6 +132,17 @@ class AutoNoteRaspberryPi:
             printFATAL("No connection.")
             return False
 
+    def resize_image(self, imgpath, split):
+        resultpath = "resized.jpg"
+        with Image.open(imgpath) as img:
+            img_resize = img.resize((int(img.width / split), int(img.height / split)))
+
+            img_resize.save(resultpath)
+            img_resize.close()
+
+        printOK('Resized photo image. path:{} split:{}'.format(imgpath, split))
+        return resultpath
+
     '''
     def finish(self)
     finish is kill this process.
@@ -160,15 +172,17 @@ def CheakCameraModule():
     main
 '''
 def run():
-    printOK("Running...")
     app = AutoNoteRaspberryPi()
     app.connectSmartphoneDeviceBluetooth()
     while app.connection:#loop at connection true
         requestsendimage = app.listen(app.connection)
         if requestsendimage:
             img = app.getPhotoFromRasbpPiCamera  #take photo
-            app.sendPhotoImage(img)
+            resize_img = app.resize_image(img, 2)
             app.seeYouImage(img)
+
+            app.sendPhotoImage(resize_img)
+            app.seeYouImage(resize_img)
 
 def testRun():
     printOK("Running testRun()")
@@ -180,11 +194,14 @@ def testRun():
         req = test.listen(test.connection)
         if req:
             testpath = "./test.jpg"
-            test.sendPhotoImage(testpath)
+            path = test.resize_image(testpath, 2)
+            test.sendPhotoImage(path)
             printOK("sent!!")
+            test.seeYouImage(path)
 
         else:
             pass
+
         time.sleep(1)
 
     test.BTconn.close()
