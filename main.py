@@ -38,7 +38,7 @@ class AutoNoteRaspberryPi:
                 break
 
         try:
-            self.BTconn = serial.Serial(filepath, baudrate=38400, timeout=300)  # import Bluetooth connection infomation
+            self.BTconn = serial.Serial(filepath, baudrate=115200, timeout=300)  # import Bluetooth connection infomation
             self.connection = True
             printOK("Success connecting Android device.")
         except Exception as e:
