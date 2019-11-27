@@ -38,7 +38,7 @@ class AutoNoteRaspberryPi:
                 break
 
         try:
-            self.BTconn = serial.Serial(filepath, baudrate=9600, timeout=300)  # import Bluetooth connection infomation
+            self.BTconn = serial.Serial(filepath, baudrate=38400, timeout=300)  # import Bluetooth connection infomation
             self.connection = True
             printOK("Success connecting Android device.")
         except Exception as e:
@@ -113,7 +113,7 @@ class AutoNoteRaspberryPi:
                 return None
             except serial.SerialException as e:
                 printFATAL("SerialException:{}".format(str(e)))
-                return None
+                sys.exit(1)
 
             if req == self.REQUEST_SEND_IMAGE:
                 printOK("receive request send image\n")
