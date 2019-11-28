@@ -206,6 +206,30 @@ def testRun():
 
     test.BTconn.close()
 
+def testRun2():
+    printOK("Running testRun2()")
+    test = AutoNoteRaspberryPi()
+    test.connectSmartphoneDeviceBluetooth()
+
+    while test.connection:
+
+        req = test.listen(test.connection)
+        if req:
+            testpath = "./test.jpg"
+            path = test.resize_image(testpath, 2)
+            test.sendPhotoImage(path)
+            eof = -1
+            test.BTconn.write(eof)
+            printOK("sent!!")
+            test.seeYouImage(path)
+
+        else:
+            pass
+
+        time.sleep(1)
+
+    test.BTconn.close()
+
 #not use
 def bindRfcomm():
     while True:
@@ -231,6 +255,8 @@ if __name__ == "__main__":
         CheakCameraModule()
     elif "-t" in args:
         testRun()
+    elif "-s" in args:
+        testRun2()
     else:
         printFATAL("command line argument error.")
         sys.exit(1)
