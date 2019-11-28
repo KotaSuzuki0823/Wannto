@@ -218,7 +218,7 @@ def testRun2():
             testpath = "test.jpg"
             path = test.resize_image(testpath, 2)
             test.sendPhotoImage(path)
-            test.BTconn.write("-1")
+            test.BTconn.write(b'-1')
             printOK("sent!!")
             test.seeYouImage(path)
 
