@@ -215,11 +215,10 @@ def testRun2():
 
         req = test.listen(test.connection)
         if req:
-            testpath = "./test.jpg"
+            testpath = "test.jpg"
             path = test.resize_image(testpath, 2)
             test.sendPhotoImage(path)
-            eof = -1
-            test.BTconn.write(eof)
+            test.BTconn.write("-1")
             printOK("sent!!")
             test.seeYouImage(path)
 
