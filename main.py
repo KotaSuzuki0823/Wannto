@@ -203,9 +203,9 @@ def testRun():
                     # データを受け取る
                     data = conn.recv(1)
                     if data == b'1':
-                        with open("test.jpg", "rb") as fp:
-                            imgfiledata = fp.read()
-                            conn.sendall(imgfiledata)
+                        #with open("test.jpg", "rb") as fp:
+                            #imgfiledata = fp.read()
+                            conn.sendall(b'hoge')
                             printOK("sent!!!")
                     else:
                         break
