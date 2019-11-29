@@ -107,7 +107,7 @@ class AutoNoteRaspberryPi:
         if connection:
             printOK("Listen...")
             try:
-                req = self.BTconn.read(2)
+                req = self.BTconn.read(1)
                 printOK("Received:{},(str:{})".format(req,str(req)))
             except serial.SerialTimeoutException as te:
                 printFATAL("TIMEOUT:{}".format(str(te)))
