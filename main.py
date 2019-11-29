@@ -5,6 +5,7 @@ import welcome as w
 import os
 import time
 from PIL import Image
+import socket
 
 #command-line arguments
 args = sys.argv
@@ -20,9 +21,9 @@ class AutoNoteRaspberryPi:
         self.connection = False
         self.BTconn = None  # Bluetooth connection infomation
 
-        self.REQUEST_FINISH = b'48'#0
+        self.REQUEST_FINISH = b'0'#0
         self.REQUEST_SEND_IMAGE = b'1'#1
-        self.KEEP_ALIVE = b'50'#2
+        self.KEEP_ALIVE = b'2'#2
 
     '''
     def connectSmartphoneDeviceBluetooth(self)
@@ -186,21 +187,27 @@ def run():
 
 def testRun():
     printOK("Running testRun()")
-    test = AutoNoteRaspberryPi()
-    test.connectSmartphoneDeviceBluetooth()
 
-    while test.connection:
-
-        req = test.listen(test.connection)
-        if req:
-            testpath = "./test.jpg"
-            path = test.resize_image(testpath, 2)
-            test.sendPhotoImage(path)
-            printOK("sent!!")
-            test.seeYouImage(path)
-
-        else:
-            pass
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        # IPアドレスとポートを指定
+        s.bind(('192.168.100.60', 50007))
+        # 1 接続
+        s.listen(1)
+        # connection するまで待つ
+        while True:
+            # 誰かがアクセスしてきたら、コネクションとアドレスを入れる
+            conn, addr = s.accept()
+            with conn:
+                while True:
+                    # データを受け取る
+                    data = conn.recv(1)
+                    if data == b'1':
+                        with open("test.jpg", "rb") as fp:
+                            imgfiledata = fp.read()
+                            conn.sendall(imgfiledata)
+                            printOK("sent!!!")
+                    else:
+                        break
 
         time.sleep(1)
 
@@ -229,24 +236,6 @@ def testRun2():
 
     test.BTconn.close()
 
-#not use
-def bindRfcomm():
-    while True:
-        print('[RFCOMM BIND]enter target Bluetooth addoress')
-        address = input()
-        cmd = 'sudo rfcomm bind 0 ' + address
-        try:
-            cmdResult = (subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]).decode('utf-8')
-        except subprocess.CalledProcessError as e:
-            sys.exit("\n Oops!! %s" % str(e))
-
-        if os.path.isfile('/dev/rfcomm0'):
-            print("Success!!\n")
-            return
-        else:
-            print(cmdResult)
-
-
 if __name__ == "__main__":
     if len(args) == 1:
         run()
@@ -256,6 +245,7 @@ if __name__ == "__main__":
         testRun()
     elif "-s" in args:
         testRun2()
+
     else:
         printFATAL("command line argument error.")
         sys.exit(1)
