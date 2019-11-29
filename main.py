@@ -190,7 +190,7 @@ def testRun():
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         # IPアドレスとポートを指定
-        s.bind((socket.gethostname(), 50007))
+        s.bind(("192.168.100.83", 50007))
         printOK("bind ok:{}".format(socket.gethostname()))
         # 1 接続
         s.listen(1)
